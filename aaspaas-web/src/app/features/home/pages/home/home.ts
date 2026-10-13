@@ -1,7 +1,6 @@
 
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 import { CategoryApiService } from '../../../categories/services/category-api.service';
 import { Category } from '../../../categories/models/category.model';
@@ -9,7 +8,7 @@ import { Category } from '../../../categories/models/category.model';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
