@@ -1,0 +1,71 @@
+
+<div class="auth-page">
+  <div class="auth-card">
+    <h1>Welcome to AASPAAS</h1>
+    <p class="subtitle">Login to continue</p>
+
+    <div class="error-message" *ngIf="errorMessage" role="alert">
+      {{ errorMessage }}
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="submitLogin()">
+      <div class="form-field">
+        <label for="phone">Phone number</label>
+
+        <input
+          id="phone"
+          type="tel"
+          formControlName="phone"
+          placeholder="Enter your phone number"
+          autocomplete="tel"
+        />
+
+        <small
+          class="field-error"
+          *ngIf="loginForm.controls.phone.touched &&
+                 loginForm.controls.phone.errors?.['required']"
+        >
+          Phone number is required.
+        </small>
+
+        <small
+          class="field-error"
+          *ngIf="loginForm.controls.phone.touched &&
+                 (loginForm.controls.phone.errors?.['minlength'] ||
+                  loginForm.controls.phone.errors?.['maxlength'])"
+        >
+          Phone number must contain 10 to 20 characters.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="password">Password</label>
+
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="Enter your password"
+          autocomplete="current-password"
+        />
+
+        <small
+          class="field-error"
+          *ngIf="loginForm.controls.password.touched &&
+                 loginForm.controls.password.errors?.['required']"
+        >
+          Password is required.
+        </small>
+      </div>
+
+      <button type="submit" [disabled]="loading">
+        {{ loading ? 'Logging in...' : 'Login' }}
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      New to AASPAAS?
+      <a routerLink="/register">Create an account</a>
+    </p>
+  </div>
+</div>

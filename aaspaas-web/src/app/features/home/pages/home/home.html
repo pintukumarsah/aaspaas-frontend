@@ -1,0 +1,73 @@
+
+<main class="home-page">
+  <section class="welcome-section">
+    <p class="eyebrow">YOUR NEIGHBOURHOOD MARKETPLACE</p>
+    <h1>Sab kuch, aapke Aaspaas</h1>
+    <p>
+      Apne aas-paas ke businesses, products aur services explore karein.
+    </p>
+  </section>
+
+  <section class="category-section">
+    <div class="section-heading">
+      <div>
+        <h2>Explore Categories</h2>
+        <p>Choose a category to get started.</p>
+      </div>
+
+      <button
+        type="button"
+        class="text-button"
+        (click)="loadCategories()"
+        [disabled]="loadingCategories"
+      >
+        Refresh
+      </button>
+    </div>
+
+    <p *ngIf="loadingCategories" class="state-message" role="status">
+      Loading categories...
+    </p>
+
+    <div *ngIf="categoryError" class="error-state" role="alert">
+      <p>{{ categoryError }}</p>
+      <button type="button" (click)="retryCategories()">
+        Try again
+      </button>
+    </div>
+
+    <div
+      *ngIf="!loadingCategories && !categoryError && categories.length === 0"
+      class="state-message"
+    >
+      Abhi koi category available nahi hai.
+    </div>
+
+    <div
+      class="category-grid"
+      *ngIf="!loadingCategories && !categoryError && categories.length > 0"
+    >
+      <article class="category-card" *ngFor="let category of categories">
+        <div class="category-icon" aria-hidden="true">
+          {{ category.name.charAt(0).toUpperCase() }}
+        </div>
+
+        <h3>{{ category.name }}</h3>
+
+        <p *ngIf="category.description">
+          {{ category.description }}
+        </p>
+
+        <small>{{ category.type }}</small>
+      </article>
+    </div>
+  </section>
+
+  <section class="marketplace-note">
+    <h2>Shop from local businesses</h2>
+    <p>
+      Product listings ko business ke saath browse karein.
+      Business-specific product listing agle section mein available hai.
+    </p>
+  </section>
+</main>

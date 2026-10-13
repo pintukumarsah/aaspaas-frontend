@@ -1,0 +1,60 @@
+
+<main class="products-page">
+  <a routerLink="/" class="back-link">← Back to home</a>
+
+  <header class="page-heading">
+    <p class="eyebrow">AASPAAS MARKETPLACE</p>
+    <h1>Products</h1>
+    <p *ngIf="businessId !== null">
+      Business ID: {{ businessId }}
+    </p>
+  </header>
+
+  <p *ngIf="loading" class="state-message" role="status">
+    Loading products...
+  </p>
+
+  <div *ngIf="errorMessage" class="error-state" role="alert">
+    <p>{{ errorMessage }}</p>
+    <button type="button" (click)="retry()">Try again</button>
+  </div>
+
+  <div
+    *ngIf="!loading && !errorMessage && products.length === 0"
+    class="state-message"
+  >
+    Is business mein abhi koi available product nahi hai.
+  </div>
+
+  <section
+    class="product-grid"
+    *ngIf="!loading && !errorMessage && products.length > 0"
+    aria-label="Available products"
+  >
+    <article class="product-card" *ngFor="let product of products">
+      <div class="product-placeholder" aria-hidden="true">
+        {{ product.name.charAt(0).toUpperCase() }}
+      </div>
+
+      <div class="product-content">
+        <p class="business-name">{{ product.businessName }}</p>
+        <h2>{{ product.name }}</h2>
+
+        <p class="description" *ngIf="product.description">
+          {{ product.description }}
+        </p>
+
+        <p class="category-name">{{ product.categoryName }}</p>
+
+        <p class="price">
+          {{ product.price | currency:'INR':'symbol':'1.2-2':'en-IN' }}
+          <span *ngIf="product.unit">/ {{ product.unit }}</span>
+        </p>
+
+        <p class="availability">
+          {{ product.available ? 'Available' : 'Currently unavailable' }}
+        </p>
+      </div>
+    </article>
+  </section>
+</main>
