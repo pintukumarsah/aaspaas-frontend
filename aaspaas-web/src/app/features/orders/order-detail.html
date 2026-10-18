@@ -1,0 +1,177 @@
+<div class="container page">
+  <a routerLink="/orders" class="muted small">← Meri orders</a>
+
+  @if (loading()) {
+    <div class="skeleton" style="height: 320px; margin-top: 16px"></div>
+  } @else if (order(); as o) {
+    <div class="page-head" style="margin-top: 12px">
+      <div>
+        <h1>Order #{{ o.orderNumber }}</h1>
+        <p>{{ o.businessName }} · {{ o.createdAt | when }}</p>
+      </div>
+      <div class="row">
+        <span class="badge" [class]="'badge ' + cls(o.orderStatus)">{{ o.orderStatus | human }}</span>
+        <span class="badge" [class]="'badge ' + cls(o.paymentStatus)">Payment: {{ o.paymentStatus | human }}</span>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="stack">
+        <section class="card">
+          <h3>Items</h3>
+          @for (i of o.items; track i.id) {
+            <div class="row-between" style="padding: 8px 0; border-bottom: 1px solid var(--line)">
+              <div><strong>{{ i.productName }}</strong><div class="muted small">{{ i.quantity }} × {{ i.unitPrice | inr }}</div></div>
+              <strong>{{ i.totalPrice | inr }}</strong>
+            </div>
+          }
+          <div class="stack-sm mt">
+            <div class="row-between small"><span class="muted">Subtotal</span><span>{{ o.subtotal | inr }}</span></div>
+            <div class="row-between small"><span class="muted">Delivery fee</span><span>{{ o.deliveryFee | inr }}</span></div>
+            @if (o.platformFee > 0) { <div class="row-between small"><span class="muted">Platform fee</span><span>{{ o.platformFee | inr }}</span></div> }
+            @if (o.discountAmount > 0) { <div class="row-between small"><span class="muted">Discount</span><span>−{{ o.discountAmount | inr }}</span></div> }
+            <div class="row-between"><strong>Total</strong><span class="price" style="font-size: 1.4rem">{{ o.totalAmount | inr }}</span></div>
+          </div>
+        </section>
+
+        <!-- ------------------------------ DELIVERY ------------------------------ -->
+        @if (o.orderStatus !== 'CANCELLED') {
+          <section class="card">
+            <h3>Delivery</h3>
+
+            @if (assignment(); as a) {
+              <div class="row-between">
+                <div>
+                  <div class="strong">{{ a.partnerName || 'Delivery partner' }}</div>
+                  <div class="muted small">Delivery fee {{ (a.agreedDeliveryFee ?? a.deliveryAmount ?? 0) | inr }}@if (a.estimatedMinutes) { · ~{{ a.estimatedMinutes }} min }</div>
+                </div>
+                <span class="badge" [class]="'badge ' + cls(a.status)">{{ a.status | human }}</span>
+              </div>
+
+              @if (trackingActive()) {
+                <div class="alert alert-info mt">
+                  @if (position(); as p) {
+                    Partner ki last location: {{ p.recordedAt | when }}.
+                    <a [href]="mapLink()" target="_blank" rel="noopener" class="strong">Map par dekhein</a>
+                  } @else {
+                    Partner ki location abhi aa rahi hai... (har {{ 8 }} second mein update)
+                  }
+                </div>
+              }
+              @if (a.status === 'PICKUP_OTP_SENT' || a.status === 'DELIVERY_OTP_SENT' || a.status === 'OUT_FOR_DELIVERY') {
+                <p class="small muted mt">Saaman lete waqt delivery partner ko apna OTP batayein.</p>
+              }
+              @if (history().length) {
+                <ul class="timeline mt">
+                  @for (h of history(); track h.id) {
+                    <li><strong>{{ h.status | human }}</strong><div class="tiny muted">{{ h.createdAt | when }}@if (h.remarks) { · {{ h.remarks }} }</div></li>
+                  }
+                </ul>
+              }
+            } @else if (request(); as r) {
+              <div class="row-between">
+                <div><div class="strong">Delivery request #{{ r.id }}</div><div class="muted small">Budget {{ r.maxBudget | inr }}</div></div>
+                <span class="badge" [class]="'badge ' + cls(r.status)">{{ r.status | human }}</span>
+              </div>
+              <div class="row mt">
+                <button type="button" class="btn btn-outline btn-sm" (click)="loadQuotes()">Quotes refresh karein</button>
+                <button type="button" class="btn btn-ghost btn-sm" (click)="cancelRequest()">Request cancel karein</button>
+              </div>
+              @if (quotes().length) {
+                <div class="stack-sm mt">
+                  @for (q of quotes(); track q.id) {
+                    <div class="card-flat row-between">
+                      <div>
+                        <div class="strong">{{ q.partner?.user?.fullName || 'Delivery partner' }}</div>
+                        <div class="muted small">@if (q.partner?.rating) { ⭐ {{ q.partner?.rating }} · }@if (q.estimatedMinutes) { ~{{ q.estimatedMinutes }} min }@if (q.message) { · {{ q.message }} }</div>
+                      </div>
+                      <div class="row">
+                        <span class="price">{{ q.quotedAmount | inr }}</span>
+                        <button type="button" class="btn btn-primary btn-sm" [disabled]="busy()" (click)="selectQuote(q)">Chuniye</button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="muted small mt">Abhi koi quote nahi aaya. Nearby partners ko request dikh rahi hai, thodi der baad refresh karein.</p>
+              }
+            } @else {
+              <p class="muted small">Delivery partner chunne ke liye apna maximum budget batayein. Partners apna quote bhejenge aur aap chunenge.</p>
+              <div class="form-grid mt">
+                <div class="field"><label for="budget">Maximum budget (₹)</label><input id="budget" type="number" min="0" class="input" [(ngModel)]="maxBudget" name="budget" /></div>
+                <div class="field"><label for="note">Note (optional)</label><input id="note" class="input" [(ngModel)]="note" name="note" maxlength="500" placeholder="Jaise: gate par call karein" /></div>
+              </div>
+              <button type="button" class="btn btn-primary" [disabled]="creating()" (click)="arrangeDelivery()">{{ creating() ? 'Bhej rahe hain...' : 'Delivery partner dhoondhein' }}</button>
+            }
+          </section>
+        }
+      </div>
+
+      <aside class="stack">
+        @if (canPay()) {
+          <section class="card">
+            <h3>Payment baaki hai</h3>
+            <select class="select" [ngModel]="payMethod()" (ngModelChange)="payMethod.set($event)" name="method" aria-label="Payment method">
+              <option value="COD">Cash on Delivery</option>
+              <option value="UPI">UPI</option>
+              <option value="CARD">Card</option>
+              <option value="NET_BANKING">Net banking</option>
+            </select>
+            <button type="button" class="btn btn-primary btn-block mt" [disabled]="paying()" (click)="pay()">{{ paying() ? 'Ho raha hai...' : 'Payment karein' }}</button>
+          </section>
+        }
+
+        <section class="card">
+          <h3>Madad</h3>
+          <div class="stack-sm">
+            @if (delivered()) {
+              <button type="button" class="btn btn-gold btn-block" (click)="open('rate')">⭐ Dukaan ko rate karein</button>
+            }
+            @if (canCancel()) {
+              <button type="button" class="btn btn-outline btn-block" (click)="open('cancel')">Order cancel karein</button>
+            }
+            <button type="button" class="btn btn-ghost btn-block" (click)="open('dispute')">Koi problem hai? Shikayat karein</button>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    @if (modal(); as m) {
+      <div class="modal-backdrop" (click)="closeModal()">
+        <div class="modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+          @if (m === 'cancel') {
+            <h3>Order cancel karein</h3>
+            <div class="field"><label for="why">Wajah</label><textarea id="why" class="textarea" [(ngModel)]="reason" name="why" maxlength="500" placeholder="Kam se kam 3 akshar"></textarea></div>
+            <div class="row"><button type="button" class="btn btn-danger" [disabled]="busy() || reason.trim().length < 3" (click)="doCancel()">Haan, cancel karein</button><button type="button" class="btn btn-ghost" (click)="closeModal()">Wapas</button></div>
+          }
+          @if (m === 'dispute') {
+            <h3>Shikayat darj karein</h3>
+            <div class="field"><label for="dc">Problem</label>
+              <select id="dc" class="select" [(ngModel)]="disputeCode" name="dc">
+                <option value="ITEM_ISSUE">Saaman kharab / galat</option>
+                <option value="MISSING_ITEM">Saaman kam aaya</option>
+                <option value="NOT_DELIVERED">Delivery nahi hui</option>
+                <option value="OVERCHARGED">Zyada paise liye</option>
+                <option value="OTHER">Kuch aur</option>
+              </select></div>
+            <div class="field"><label for="dt">Detail (kam se kam 10 akshar)</label><textarea id="dt" class="textarea" [(ngModel)]="disputeText" name="dt" maxlength="2000"></textarea></div>
+            <div class="field"><label for="dr">Refund chahiye (₹)</label><input id="dr" type="number" min="0" class="input" [(ngModel)]="refundAmount" name="dr" /></div>
+            <div class="row"><button type="button" class="btn btn-primary" [disabled]="busy() || disputeText.trim().length < 10" (click)="doDispute()">Shikayat bhejein</button><button type="button" class="btn btn-ghost" (click)="closeModal()">Wapas</button></div>
+          }
+          @if (m === 'rate') {
+            <h3>{{ o.businessName }} ko rate karein</h3>
+            <div class="row" style="margin-bottom: 12px">
+              @for (s of [1, 2, 3, 4, 5]; track s) {
+                <button type="button" class="icon-btn" style="font-size: 1.5rem" [style.color]="s <= stars ? '#f5b83d' : '#c9ccda'" (click)="stars = s" [attr.aria-label]="s + ' star'">★</button>
+              }
+            </div>
+            <div class="field"><label for="rv">Review (optional)</label><textarea id="rv" class="textarea" [(ngModel)]="review" name="rv" maxlength="2000"></textarea></div>
+            <div class="row"><button type="button" class="btn btn-primary" [disabled]="busy()" (click)="doRate()">Rating bhejein</button><button type="button" class="btn btn-ghost" (click)="closeModal()">Wapas</button></div>
+          }
+        </div>
+      </div>
+    }
+  } @else {
+    <div class="card center mt"><h3>Order nahi mila</h3><a routerLink="/orders" class="btn btn-outline mt">Meri orders</a></div>
+  }
+</div>

@@ -1,0 +1,239 @@
+.hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--maroon);
+  color: #fff4ef;
+}
+.orb {
+  position: absolute;
+  border-radius: 50%;
+}
+.orb-a {
+  width: 520px;
+  height: 520px;
+  right: -140px;
+  top: -160px;
+  background: #b8404b;
+  opacity: 0.55;
+}
+.orb-b {
+  width: 460px;
+  height: 460px;
+  left: -120px;
+  bottom: -220px;
+  background: var(--maroon-600);
+  opacity: 0.7;
+}
+.hero-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 40px;
+  padding-top: 56px;
+  padding-bottom: 64px;
+  align-items: center;
+}
+.hero-copy {
+  min-width: 0;
+}
+.hero h1 {
+  color: #fff4ef;
+  font-size: clamp(2.4rem, 7vw, 4.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  margin: 18px 0 0;
+}
+.hero p {
+  color: #ffe7df;
+  font-size: 1.15rem;
+  max-width: 520px;
+  margin-top: 18px;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.14);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+.pill i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.searchbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 26px;
+  max-width: 560px;
+  background: #fff;
+  color: var(--ink-3);
+  padding: 6px 6px 6px 16px;
+  border-radius: var(--radius);
+}
+.searchbar input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  min-height: 44px;
+}
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+.ghost-light {
+  border-color: #ffe7df;
+  color: #fff4ef;
+  background: transparent;
+}
+.ghost-light:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.hero-art {
+  position: relative;
+  height: 380px;
+  display: none;
+}
+.float {
+  position: absolute;
+  background: #fff;
+  color: var(--ink);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.25);
+}
+.f1 {
+  left: 6%;
+  top: 2%;
+  width: 78%;
+}
+.f2 {
+  right: 0;
+  top: 38%;
+  width: 62%;
+  background: var(--ink);
+  color: #fff;
+}
+.f3 {
+  left: 0;
+  bottom: 0;
+  width: 54%;
+  background: var(--cream-2);
+}
+.bar {
+  height: 8px;
+  background: var(--rose-200);
+  border-radius: 4px;
+  margin: 14px 0 8px;
+}
+.bar span {
+  display: block;
+  width: 72%;
+  height: 100%;
+  background: var(--maroon);
+  border-radius: 4px;
+}
+.av {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--ink);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fee {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: var(--maroon);
+  letter-spacing: -0.04em;
+}
+
+.block {
+  padding-top: 48px;
+}
+.link {
+  color: var(--maroon);
+  font-weight: 700;
+}
+.cats {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+.cat {
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+.ic {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+.step {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--maroon);
+  color: #fff;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.join {
+  background: var(--ink);
+  color: #fff;
+  border-radius: 28px;
+  padding: 40px 32px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.join h2 {
+  color: #fff;
+}
+.join p {
+  color: #c9ccda;
+  margin-top: 10px;
+  max-width: 520px;
+}
+
+@media (min-width: 900px) {
+  .hero-grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    padding-top: 80px;
+    padding-bottom: 88px;
+  }
+  .hero-art {
+    display: block;
+  }
+}

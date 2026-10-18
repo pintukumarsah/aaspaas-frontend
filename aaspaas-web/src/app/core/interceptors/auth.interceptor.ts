@@ -1,70 +1,50 @@
-
+import { HttpErrorResponse, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
-import {
-  HttpErrorResponse,
-  HttpInterceptorFn,
-} from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { AuthService } from '../auth/auth.service';
+import { ToastService } from '../services/toast.service';
 
-import { API_ENDPOINTS } from '../http/api-endpoints';
-import { TokenStorageService } from '../auth/token-storage.service';
-import { AuthSessionService } from '../auth/auth-session.service';
+const AUTH_PATH = /\/auth\/(login|register|refresh|logout)(\?|$)/;
 
+function withBearer(req: HttpRequest<unknown>, token: string): HttpRequest<unknown> {
+  return req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+}
+
+/**
+ * Adds `Authorization: Bearer <accessToken>` to API calls. The backend access
+ * token lives only 15 minutes (expiresIn = 900), so on a 401 the interceptor
+ * silently calls POST /auth/refresh once and replays the original request.
+ */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const tokenStorage = inject(TokenStorageService);
-  const authSession = inject(AuthSessionService);
+  const auth = inject(AuthService);
   const router = inject(Router);
+  const toast = inject(ToastService);
 
-  const authUrls = [
-    API_ENDPOINTS.auth.login,
-    API_ENDPOINTS.auth.register,
-    API_ENDPOINTS.auth.refresh,
-    API_ENDPOINTS.auth.logout,
-  ];
+  const isApi = req.url.startsWith(environment.apiUrl);
+  const isAuthCall = AUTH_PATH.test(req.url);
+  if (!isApi || isAuthCall) return next(req);
 
-  const isAuthRequest = authUrls.some((url) =>
-    req.url.startsWith(url)
-  );
+  const token = auth.accessToken();
+  const outgoing = token ? withBearer(req, token) : req;
 
-  const accessToken = tokenStorage.getAccessToken();
-
-  const requestToSend =
-    accessToken && !isAuthRequest
-      ? req.clone({
-          setHeaders: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        })
-      : req;
-
-  return next(requestToSend).pipe(
-    catchError((error: unknown) => {
-      if (
-        !(error instanceof HttpErrorResponse) ||
-        error.status !== 401 ||
-        isAuthRequest
-      ) {
-        return throwError(() => error);
+  return next(outgoing).pipe(
+    catchError((err: unknown) => {
+      if (!(err instanceof HttpErrorResponse) || err.status !== 401 || !auth.refreshToken()) {
+        return throwError(() => err);
       }
-
-      return authSession.refreshAccessToken().pipe(
-        switchMap((newAccessToken) => {
-          const retryRequest = req.clone({
-            setHeaders: {
-              Authorization: `Bearer ${newAccessToken}`,
-            },
-          });
-
-          return next(retryRequest);
+      return auth.refreshAccessToken().pipe(
+        switchMap((fresh) => next(withBearer(req, fresh))),
+        catchError((refreshErr: unknown) => {
+          if (auth.isLoggedIn()) {
+            auth.clear();
+            toast.info('Session khatam ho gaya. Dobara login karein.');
+            void router.navigate(['/login'], { queryParams: { redirect: router.url } });
+          }
+          return throwError(() => refreshErr);
         }),
-        catchError((refreshError: unknown) => {
-          tokenStorage.clearSession();
-          void router.navigateByUrl('/login');
-
-          return throwError(() => refreshError);
-        })
       );
-    })
+    }),
   );
 };

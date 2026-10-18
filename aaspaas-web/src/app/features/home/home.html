@@ -1,0 +1,114 @@
+<section class="hero">
+  <span class="orb orb-a"></span>
+  <span class="orb orb-b"></span>
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="pill"><i></i> Aapke mohalle ki dukaanein, ek jagah</span>
+      <h1>Aapke aaspaas,<br />aapki apni dukaan.</h1>
+      <p>Kirana, dawai, khana aur ghar ki service. Local dukaandaar se seedha, minutes mein aapke darwaze par.</p>
+
+      <form class="searchbar" (ngSubmit)="go()" #f="ngForm">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+        <input name="q" [(ngModel)]="search" placeholder="Atta, doodh, dawai, plumber..." aria-label="Search" />
+        <button class="btn btn-gold" type="submit">Search</button>
+      </form>
+
+      <div class="hero-cta">
+        <a routerLink="/shop" class="btn btn-gold btn-lg">Abhi order karein</a>
+        <a routerLink="/services" class="btn btn-lg ghost-light">Service book karein</a>
+      </div>
+    </div>
+
+    <div class="hero-art" aria-hidden="true">
+      <div class="float f1">
+        <div class="row-between"><strong>Order #2841</strong><span class="badge badge-amber">Raaste mein</span></div>
+        <div class="bar"><span></span></div>
+        <div class="row-between tiny muted"><span>Dukaan se nikla</span><span>8 min door</span></div>
+      </div>
+      <div class="float f2">
+        <div class="tiny">Delivery partner</div>
+        <div class="row" style="margin-top: 8px">
+          <span class="av">R</span>
+          <div><strong>Rider pass hai</strong><div class="tiny">Delivery OTP ready</div></div>
+        </div>
+      </div>
+      <div class="float f3">
+        <div class="tiny muted">Delivery charge</div>
+        <div class="fee">₹20</div>
+        <div class="tiny muted">Cash on Delivery bhi chalega</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container block">
+  <div class="page-head" style="margin-bottom: 18px">
+    <h2>Kya chahiye aaj?</h2>
+    <a routerLink="/shop" class="link">Sab dekhein</a>
+  </div>
+  @if (categories().length) {
+    <div class="cats">
+      @for (c of categories(); track c.id; let i = $index) {
+        <a class="cat card-hover" [routerLink]="['/shop']" [queryParams]="{ categoryId: c.id }">
+          <span class="ic" [style.background]="tone(i).bg" [style.color]="tone(i).fg">{{ c.name.charAt(0).toUpperCase() }}</span>
+          <span>{{ c.name }}</span>
+        </a>
+      }
+    </div>
+  } @else {
+    <div class="cats">
+      <a class="cat card-hover" routerLink="/shop"><span class="ic" style="background: #e8f4e5; color: #2e7d32">K</span><span>Kirana</span></a>
+      <a class="cat card-hover" routerLink="/shop"><span class="ic" style="background: #fde7ea; color: #c62839">D</span><span>Dawai</span></a>
+      <a class="cat card-hover" routerLink="/shop"><span class="ic" style="background: #fff1cc; color: #b07000">K</span><span>Khana</span></a>
+      <a class="cat card-hover" routerLink="/services"><span class="ic" style="background: #ede7fa; color: #5b3db0">S</span><span>Services</span></a>
+    </div>
+  }
+</section>
+
+<section class="container block">
+  <div class="page-head" style="margin-bottom: 18px">
+    <h2>Aapke paas ke popular products</h2>
+    <a routerLink="/shop" class="link">Sab dekhein</a>
+  </div>
+  @if (loading()) {
+    <div class="grid-4">
+      @for (n of [1, 2, 3, 4]; track n) {
+        <div class="skeleton" style="height: 290px"></div>
+      }
+    </div>
+  } @else if (products().length) {
+    <div class="grid-4">
+      @for (p of products(); track p.id) {
+        <app-product-card [product]="p" />
+      }
+    </div>
+  } @else {
+    <div class="card center">
+      <h3>Abhi koi product nahi hai</h3>
+      <p class="muted">Dukaandaar jaldi hi products jodenge. Tab tak services dekh lijiye.</p>
+      <a routerLink="/services" class="btn btn-outline mt">Services dekhein</a>
+    </div>
+  }
+</section>
+
+<section class="container block">
+  <h2 style="margin-bottom: 18px">3 step mein ghar tak</h2>
+  <div class="grid-3">
+    <div class="card"><span class="step">1</span><h3>Dukaan chuniye</h3><p class="muted">Apne area ke verified vendors se products ya services chuniye.</p></div>
+    <div class="card"><span class="step">2</span><h3>Order karein</h3><p class="muted">COD ya online payment. Order ka status live dikhta rahega.</p></div>
+    <div class="card"><span class="step">3</span><h3>OTP dekar lein</h3><p class="muted">Delivery partner ko OTP batayein, saaman aapke haath mein.</p></div>
+  </div>
+</section>
+
+<section class="container block">
+  <div class="join">
+    <div>
+      <h2>Dukaan hai? Aaspaas par aaiye.</h2>
+      <p>Apne mohalle ke graahakon tak pahunchiye. Ya delivery partner banke har order par kamayiye.</p>
+    </div>
+    <div class="row">
+      <a routerLink="/seller" class="btn btn-gold btn-lg">Vendor banein</a>
+      <a routerLink="/delivery" class="btn btn-lg ghost-light">Delivery partner banein</a>
+    </div>
+  </div>
+</section>

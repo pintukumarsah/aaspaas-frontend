@@ -1,14 +1,103 @@
-<div class="app-shell">
-  <header class="site-header">
-    <a class="brand" routerLink="/home" aria-label="Aaspaas home"><span class="brand-mark">a</span><span>Aaspaas<span class="brand-dot">.</span></span></a>
-    <div class="search-box"><span class="search-icon">⌕</span><input aria-label="Search" placeholder="Search for products, shops and services" /><kbd>⌘ K</kbd></div>
-    <nav class="header-actions">
-      <a class="location-pill" routerLink="/home"><span>⌖</span><span><small>Delivering to</small><b>Your location</b></span></a>
-      <a class="icon-link" routerLink="/cart" aria-label="Cart"><span>♧</span><small>Cart</small></a>
-      <ng-container *ngIf="isLoggedIn; else guestLinks"><button class="account-button" (click)="logout()">Log out ↗</button></ng-container>
-      <ng-template #guestLinks><a class="login-link" routerLink="/auth/login">Log in</a><a class="signup-button" routerLink="/auth/register">Get started <span>→</span></a></ng-template>
+<div class="topbar">Delivery 15–30 min mein · Apne mohalle ki dukaanein · Cash on Delivery available</div>
+
+<header class="header">
+  <div class="container header-inner">
+    <a routerLink="/" class="brand" aria-label="Aaspaas home">
+      <svg width="34" height="34" viewBox="0 0 36 36" aria-hidden="true">
+        <rect width="36" height="36" rx="11" fill="#a82f3a" />
+        <path d="M18 8c-4.4 0-8 3.4-8 7.7 0 5.4 6.2 11.2 7.2 12.1a1.2 1.2 0 0 0 1.6 0c1-.9 7.2-6.7 7.2-12.1C26 11.4 22.4 8 18 8Zm0 10.4a2.9 2.9 0 1 1 0-5.8 2.9 2.9 0 0 1 0 5.8Z" fill="#fff4ef" />
+      </svg>
+      <span>Aaspaas</span>
+    </a>
+
+    <nav class="nav" aria-label="Main">
+      <a routerLink="/shop" routerLinkActive="on">Shop</a>
+      <a routerLink="/services" routerLinkActive="on">Services</a>
+      @if (auth.isLoggedIn()) {
+        <a routerLink="/orders" routerLinkActive="on">Orders</a>
+      }
     </nav>
-  </header>
-  <main><router-outlet /></main>
-  <footer class="site-footer"><a class="brand footer-brand" routerLink="/home"><span class="brand-mark">a</span><span>Aaspaas<span class="brand-dot">.</span></span></a><span>Your neighbourhood, all in one place.</span><span>© 2026 Aaspaas</span></footer>
+
+    <div class="header-actions">
+      @if (auth.isLoggedIn()) {
+        <a routerLink="/notifications" class="icon-btn bell" aria-label="Notifications">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8" /><path d="M10 20a2 2 0 0 0 4 0" /></svg>
+          @if (social.unread() > 0) {
+            <span class="dot">{{ social.unread() > 9 ? '9+' : social.unread() }}</span>
+          }
+        </a>
+        <a routerLink="/cart" class="btn btn-primary cart-btn" aria-label="Cart">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h14l-1.4 11.2a2 2 0 0 1-2 1.8H8.4a2 2 0 0 1-2-1.8L5 7Z" /><path d="M9 7a3 3 0 0 1 6 0" /></svg>
+          <span class="hide-sm">Cart</span>
+          @if (cart.count() > 0) {
+            <span class="count">{{ cart.count() }}</span>
+          }
+        </a>
+        <div class="user">
+          <button type="button" class="avatar" (click)="userMenu.set(!userMenu())" [attr.aria-expanded]="userMenu()" aria-haspopup="menu" aria-label="Account menu">{{ auth.initial() }}</button>
+          @if (userMenu()) {
+            <div class="menu" role="menu">
+              <div class="menu-head">
+                <strong>{{ auth.fullName() }}</strong>
+                <span class="tiny muted">{{ auth.session()?.phone }}</span>
+              </div>
+              <a role="menuitem" routerLink="/account">Mera account</a>
+              <a role="menuitem" routerLink="/orders">Meri orders</a>
+              <a role="menuitem" routerLink="/bookings">Meri bookings</a>
+              @for (p of panels(); track p.path) {
+                <a role="menuitem" [routerLink]="p.path" class="panel-link">{{ p.label }}</a>
+              }
+              <a role="menuitem" routerLink="/delivery">Delivery partner banein</a>
+              <button type="button" role="menuitem" (click)="logout()">Logout</button>
+            </div>
+          }
+        </div>
+      } @else {
+        <a routerLink="/login" class="btn btn-ghost">Login</a>
+        <a routerLink="/register" class="btn btn-primary">Sign up</a>
+      }
+    </div>
+  </div>
+  @if (loading.busy()) {
+    <div class="progress" role="progressbar" aria-label="Loading"><span></span></div>
+  }
+</header>
+
+<main id="main">
+  <router-outlet />
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>
+      <div class="brand-foot">Aaspaas</div>
+      <p>Aapka mohalla, aapke paas.</p>
+    </div>
+    <div class="cols">
+      <a routerLink="/shop">Shop</a>
+      <a routerLink="/services">Services</a>
+      <a routerLink="/seller">Vendor banein</a>
+      <a routerLink="/delivery">Delivery partner banein</a>
+    </div>
+  </div>
+  <div class="container copy">© {{ year }} Aaspaas. Sabhi adhikaar surakshit.</div>
+</footer>
+
+<nav class="bottom-nav" aria-label="Quick">
+  <a routerLink="/" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: true }">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9Z" /></svg>Home</a>
+  <a routerLink="/shop" routerLinkActive="on">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18l-1.6 9a2 2 0 0 1-2 1.7H6.6a2 2 0 0 1-2-1.7L3 10Z" /><path d="m8 10 3-6M16 10l-3-6" /></svg>Shop</a>
+  <a routerLink="/services" routerLinkActive="on">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4 2.6-2.6Z" /></svg>Services</a>
+  <a routerLink="/orders" routerLinkActive="on">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 8h6M9 12h6M9 16h3" /></svg>Orders</a>
+  <a [routerLink]="auth.isLoggedIn() ? '/account' : '/login'" routerLinkActive="on">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" /></svg>Account</a>
+</nav>
+
+<div class="toasts" aria-live="polite">
+  @for (t of toast.toasts(); track t.id) {
+    <button type="button" class="toast" [class]="'toast ' + t.kind" (click)="toast.dismiss(t.id)">{{ t.message }}</button>
+  }
 </div>

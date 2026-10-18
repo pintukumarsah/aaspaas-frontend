@@ -1,48 +1,35 @@
-
 import { Injectable } from '@angular/core';
+import { Session } from '../models/api.models';
 
-import { LoginResponse } from '../../features/auth/models/auth.models';
+const KEY = 'aaspaas.session.v1';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class TokenStorageService {
-  private readonly ACCESS_TOKEN_KEY = 'aaspaas_access_token';
-  private readonly REFRESH_TOKEN_KEY = 'aaspaas_refresh_token';
-
-  saveSession(response: LoginResponse): void {
-    sessionStorage.setItem(
-      this.ACCESS_TOKEN_KEY,
-      response.accessToken
-    );
-
-    sessionStorage.setItem(
-      this.REFRESH_TOKEN_KEY,
-      response.refreshToken
-    );
+/** Persists the logged-in session (tokens + roles) in localStorage. */
+@Injectable({ providedIn: 'root' })
+export class TokenStorage {
+  read(): Session | null {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as Session;
+      return parsed && parsed.accessToken && parsed.refreshToken ? parsed : null;
+    } catch {
+      return null;
+    }
   }
 
-  getAccessToken(): string | null {
-    return sessionStorage.getItem(this.ACCESS_TOKEN_KEY);
+  write(session: Session): void {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(session));
+    } catch {
+      /* storage may be blocked (private mode) - session then lives in memory only */
+    }
   }
 
-  getRefreshToken(): string | null {
-    return sessionStorage.getItem(this.REFRESH_TOKEN_KEY);
+  clear(): void {
+    try {
+      localStorage.removeItem(KEY);
+    } catch {
+      /* ignore */
+    }
   }
-
-  clearSession(): void {
-    sessionStorage.removeItem(this.ACCESS_TOKEN_KEY);
-    sessionStorage.removeItem(this.REFRESH_TOKEN_KEY);
-  }
-
-  
-updateAccessToken(accessToken: string): void {
-  sessionStorage.setItem(this.ACCESS_TOKEN_KEY, accessToken);
-}
-
-updateSession(accessToken: string, refreshToken: string): void {
-  sessionStorage.setItem(this.ACCESS_TOKEN_KEY, accessToken);
-  sessionStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
-}
-
 }
